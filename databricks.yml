@@ -1,0 +1,46 @@
+bundle:
+  name: iposto-mlops
+
+databricks_cli_version: ">=0.218.0"
+
+include:
+  - databricks_assets/resources/*.yml
+
+sync:
+  include:
+    - src/**
+    - databricks_assets/**
+    - scripts/**
+    - README.md
+
+variables:
+  databricks_host:
+    description: Databricks workspace host.
+  node_type_id:
+    description: Worker node type.
+    default: Standard_DS3_v2
+  training_image:
+    description: Immutable DCS image used by training and scoring tasks.
+    default: ghcr.io/your-org/iposto-mlops:latest
+  bronze_path:
+    default: dbfs:/Volumes/iposto_mlops/fuelops/bronze/fuel_prices
+  silver_path:
+    default: dbfs:/Volumes/iposto_mlops/fuelops/silver/fuel_prices
+  gold_path:
+    default: dbfs:/Volumes/iposto_mlops/fuelops/gold/fuel_price_features
+  predictions_path:
+    default: dbfs:/Volumes/iposto_mlops/fuelops/gold/predictions
+  registered_model_name:
+    default: iposto_mlops_next_day_price
+
+workspace:
+  host: ${var.databricks_host}
+
+targets:
+  dev:
+    default: true
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+  prod:
+    workspace:
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}

@@ -1,0 +1,125 @@
+name: terraform
+
+on:
+  pull_request:
+    paths:
+      - "terraform/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "terraform/**"
+  workflow_dispatch:
+
+jobs:
+  bootstrap-plan:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/bootstrap
+    env:
+      TF_VAR_location: ${{ vars.AZURE_LOCATION }}
+      TF_VAR_resource_group_name: ${{ vars.AZURE_DATABRICKS_RG }}
+      TF_VAR_workspace_name: ${{ vars.AZURE_DATABRICKS_WORKSPACE }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan -input=false -no-color
+
+  bootstrap-apply:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/bootstrap
+    env:
+      TF_VAR_location: ${{ vars.AZURE_LOCATION }}
+      TF_VAR_resource_group_name: ${{ vars.AZURE_DATABRICKS_RG }}
+      TF_VAR_workspace_name: ${{ vars.AZURE_DATABRICKS_WORKSPACE }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform apply
+        run: terraform apply -input=false -auto-approve
+
+  platform-plan:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/platform
+    env:
+      TF_VAR_databricks_host: ${{ secrets.DATABRICKS_HOST }}
+      TF_VAR_databricks_token: ${{ secrets.DATABRICKS_TOKEN }}
+      TF_VAR_workspace_id: ${{ vars.DATABRICKS_WORKSPACE_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan -input=false -no-color
+
+  platform-apply:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/platform
+    env:
+      TF_VAR_databricks_host: ${{ secrets.DATABRICKS_HOST }}
+      TF_VAR_databricks_token: ${{ secrets.DATABRICKS_TOKEN }}
+      TF_VAR_workspace_id: ${{ vars.DATABRICKS_WORKSPACE_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform apply
+        run: terraform apply -input=false -auto-approve

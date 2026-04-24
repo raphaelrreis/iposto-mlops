@@ -1,0 +1,72 @@
+resources:
+  jobs:
+    iposto_mlops_daily_pipeline:
+      name: ${bundle.target}-iposto-mlops-daily-pipeline
+      max_concurrent_runs: 1
+      schedule:
+        quartz_cron_expression: "0 30 4 * * ?"
+        timezone_id: UTC
+      job_clusters:
+        - job_cluster_key: mlops_cluster
+          new_cluster:
+            spark_version: 14.3.x-cpu-ml-scala2.12
+            node_type_id: ${var.node_type_id}
+            num_workers: 2
+            data_security_mode: SINGLE_USER
+            docker_image:
+              url: ${var.training_image}
+      tasks:
+        - task_key: bronze_to_silver
+          job_cluster_key: mlops_cluster
+          spark_python_task:
+            python_file: databricks_assets/jobs/bronze_to_silver.py
+            parameters:
+              - --input-path
+              - ${var.bronze_path}
+              - --output-path
+              - ${var.silver_path}
+              - --output-format
+              - delta
+        - task_key: silver_to_gold
+          job_cluster_key: mlops_cluster
+          depends_on:
+            - task_key: bronze_to_silver
+          spark_python_task:
+            python_file: databricks_assets/jobs/silver_to_gold.py
+            parameters:
+              - --input-path
+              - ${var.silver_path}
+              - --output-path
+              - ${var.gold_path}
+              - --input-format
+              - delta
+              - --output-format
+              - delta
+        - task_key: train_model
+          job_cluster_key: mlops_cluster
+          depends_on:
+            - task_key: silver_to_gold
+          spark_python_task:
+            python_file: databricks_assets/jobs/train_model.py
+            parameters:
+              - --input-path
+              - ${var.gold_path}
+              - --input-format
+              - delta
+        - task_key: batch_inference
+          job_cluster_key: mlops_cluster
+          depends_on:
+            - task_key: train_model
+          spark_python_task:
+            python_file: databricks_assets/jobs/batch_inference.py
+            parameters:
+              - --input-path
+              - ${var.gold_path}
+              - --output-path
+              - ${var.predictions_path}
+              - --model-uri
+              - models:/${var.registered_model_name}/Staging
+              - --input-format
+              - delta
+              - --output-format
+              - delta

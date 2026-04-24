@@ -1,0 +1,4 @@
+location            = "eastus2"
+resource_group_name = "rg-iposto-mlops-dev"
+workspace_name      = "dbw-iposto-mlops-dev"
+workspace_sku       = "premium"
