@@ -26,12 +26,30 @@ class StationProfile:
 
 
 STATIONS = [
-    StationProfile("BR", "DF", "Brasilia", "BR-001", "IPIRANGA", "GASOLINE", "BRL", -15.793889, -47.882778, 5.89, 27.0),
-    StationProfile("BR", "DF", "Brasilia", "BR-002", "SHELL", "DIESEL", "BRL", -15.794100, -47.890000, 5.79, 18.0),
-    StationProfile("BR", "SP", "Sao Paulo", "BR-003", "PETROBRAS", "ETHANOL", "BRL", -23.550520, -46.633308, 4.19, 12.0),
-    StationProfile("US", "UT", "Lehi", "US-001", "CHEVRON", "GASOLINE", "USD", 40.391617, -111.850769, 3.49, 9.0),
-    StationProfile("US", "UT", "Lehi", "US-002", "MAVERIK", "DIESEL", "USD", 40.394000, -111.850100, 3.69, 7.0),
-    StationProfile("US", "AZ", "Phoenix", "US-003", "CIRCLE_K", "GASOLINE", "USD", 33.448376, -112.074036, 3.59, 8.0),
+    StationProfile(
+        "BR", "DF", "Brasilia", "BR-001", "IPIRANGA", "GASOLINE", "BRL",
+        -15.793889, -47.882778, 5.89, 27.0
+    ),
+    StationProfile(
+        "BR", "DF", "Brasilia", "BR-002", "SHELL", "DIESEL", "BRL",
+        -15.794100, -47.890000, 5.79, 18.0
+    ),
+    StationProfile(
+        "BR", "SP", "Sao Paulo", "BR-003", "PETROBRAS", "ETHANOL", "BRL",
+        -23.550520, -46.633308, 4.19, 12.0
+    ),
+    StationProfile(
+        "US", "UT", "Lehi", "US-001", "CHEVRON", "GASOLINE", "USD",
+        40.391617, -111.850769, 3.49, 9.0
+    ),
+    StationProfile(
+        "US", "UT", "Lehi", "US-002", "MAVERIK", "DIESEL", "USD",
+        40.394000, -111.850100, 3.69, 7.0
+    ),
+    StationProfile(
+        "US", "AZ", "Phoenix", "US-003", "CIRCLE_K", "GASOLINE", "USD",
+        33.448376, -112.074036, 3.59, 8.0
+    ),
 ]
 
 
@@ -40,7 +58,11 @@ def _seasonal_multiplier(current_date: date) -> float:
     return 1.0 + (math.sin(day_of_year / 365 * 2 * math.pi) * 0.035)
 
 
-def _price_for_station(profile: StationProfile, current_date: date, random_generator: random.Random) -> float:
+def _price_for_station(
+    profile: StationProfile,
+    current_date: date,
+    random_generator: random.Random
+) -> float:
     seasonal_component = _seasonal_multiplier(current_date)
     weekday_component = 1.0 + (0.01 if current_date.weekday() in {4, 5} else -0.005)
     noise = random_generator.uniform(-0.06, 0.06)
@@ -87,7 +109,9 @@ def generate_mock_records(
                     "latitude": station.latitude,
                     "longitude": station.longitude,
                     "effective_date": effective_date.isoformat(),
-                    "collected_at": datetime.combine(effective_date, datetime.min.time()).isoformat(),
+                    "collected_at": datetime.combine(
+                        effective_date, datetime.min.time()
+                    ).isoformat(),
                     "source_api": "mock-station-simulator",
                 }
                 handle.write(json.dumps(payload) + "\n")

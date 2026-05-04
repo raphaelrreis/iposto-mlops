@@ -31,7 +31,11 @@ IDENTIFIER_COLUMNS = [
 
 
 def _latest_snapshot(gold_dataset: DataFrame) -> DataFrame:
-    max_date = gold_dataset.select(F.max("effective_date").alias("max_date")).collect()[0]["max_date"]
+    max_date = (
+        gold_dataset
+        .select(F.max("effective_date").alias("max_date"))
+        .collect()[0]["max_date"]
+    )
     if max_date is None:
         raise PipelineConfigurationError("Gold dataset does not contain any effective_date values.")
     return gold_dataset.filter(F.col("effective_date") == F.lit(max_date))
@@ -59,8 +63,8 @@ def score_latest_snapshot(
     predictions = model.predict(feature_frame)
 
     output_frame = snapshot.select(*IDENTIFIER_COLUMNS).toPandas()
-    output_frame["prediction_for_date"] = pd.to_datetime(output_frame["effective_date"]) + pd.Timedelta(
-        days=1
+    output_frame["prediction_for_date"] = (
+        pd.to_datetime(output_frame["effective_date"]) + pd.Timedelta(days=1)
     )
     output_frame["predicted_price_next_day"] = predictions
     output_frame["model_uri"] = model_uri

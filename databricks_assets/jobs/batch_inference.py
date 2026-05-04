@@ -16,7 +16,9 @@ from iposto_mlops.pipelines.inference import score_latest_snapshot
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run batch inference for the latest Gold snapshot.")
+    parser = argparse.ArgumentParser(
+        description="Run batch inference for the latest Gold snapshot."
+    )
     parser.add_argument("--input-path", required=True)
     parser.add_argument("--output-path", required=True)
     parser.add_argument("--model-uri", required=True)

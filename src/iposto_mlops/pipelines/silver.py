@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import logging
-from typing import Iterable
+from collections.abc import Iterable
 
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.column import Column
 from pyspark.sql import functions as F
+from pyspark.sql.column import Column
 from pyspark.sql.window import Window
 
 from iposto_mlops.pipelines.bronze import load_bronze_dataset

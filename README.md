@@ -1,3 +1,4 @@
+
 # iposto-mlops
 
 `iposto-mlops` e uma blueprint MLOps de nivel producao para monitorar e prever a volatilidade de precos de combustiveis no Brasil e nos EUA. O projeto foi estruturado para demonstrar engenharia senior com Databricks, Terraform, Docker, CI/CD e um fluxo de dados medallion pronto para ser operacionalizado.
@@ -109,6 +110,21 @@ python scripts/generate_mock_bronze.py --output-dir data/bronze/fuel_prices --da
 ```bash
 pytest
 ```
+
+### 3.1 Rodar o fluxo local antes do push
+
+```bash
+chmod +x scripts/run_local_ci.sh
+./scripts/run_local_ci.sh
+```
+
+Para incluir a build do container local de fallback:
+
+```bash
+./scripts/run_local_ci.sh --with-docker
+```
+
+O script roda `ruff`, `pytest`, `terraform fmt -check -recursive` e, quando disponivel, `databricks bundle validate -t dev`.
 
 ### 4. Bundle Databricks
 

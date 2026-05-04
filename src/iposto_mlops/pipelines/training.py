@@ -8,7 +8,11 @@ import pandas as pd
 from pyspark.sql import DataFrame, SparkSession
 
 from iposto_mlops.config import TrainingConfig
-from iposto_mlops.schemas import CATEGORICAL_FEATURE_COLUMNS, MODEL_FEATURE_COLUMNS, NUMERIC_FEATURE_COLUMNS
+from iposto_mlops.schemas import (
+    CATEGORICAL_FEATURE_COLUMNS,
+    MODEL_FEATURE_COLUMNS,
+    NUMERIC_FEATURE_COLUMNS,
+)
 from iposto_mlops.utils.exceptions import PipelineConfigurationError
 
 LOGGER = logging.getLogger(__name__)
@@ -84,7 +88,9 @@ def _split_train_validation(
         raise PipelineConfigurationError("Training dataset is empty after feature preparation.")
 
     if len(training_frame) < 10:
-        raise PipelineConfigurationError("At least 10 training rows are required for a stable split.")
+        raise PipelineConfigurationError(
+            "At least 10 training rows are required for a stable split."
+        )
 
     split_index = max(1, int(len(training_frame) * (1 - validation_ratio)))
     if split_index >= len(training_frame):
@@ -230,7 +236,9 @@ def train_model_from_path(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Train the iposto-mlops price forecasting model.")
+    parser = argparse.ArgumentParser(
+        description="Train the iposto-mlops price forecasting model."
+    )
     parser.add_argument("--input-path", required=True)
     parser.add_argument("--input-format", default="parquet")
     args = parser.parse_args()
